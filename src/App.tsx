@@ -5,18 +5,6 @@ const MAX_PULL = 440;
 const THRESHOLD = 140;
 const DRAG_RESISTANCE = 0.78;
 
-interface PhysicsPill {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  width: number;
-  height: number;
-  angle: number;
-  va: number;
-  text: string;
-}
-
 export const App: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
@@ -24,8 +12,6 @@ export const App: React.FC = () => {
 
   const startYRef = useRef(0);
   const currentPullRef = useRef(0);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const gravityRef = useRef({ x: 0, y: 0.55 });
 
   useEffect(() => {
     if (window.screen?.orientation && 'lock' in window.screen.orientation) {
@@ -33,150 +19,6 @@ export const App: React.FC = () => {
         .lock('portrait')
         .catch(() => {});
     }
-  }, []);
-
-  useEffect(() => {
-    const handleOrientation = (e: DeviceOrientationEvent) => {
-      if (e.gamma !== null && e.beta !== null) {
-        const radGamma = (e.gamma * Math.PI) / 180;
-        const radBeta = (e.beta * Math.PI) / 180;
-        gravityRef.current = {
-          x: Math.sin(radGamma) * 0.75,
-          y: Math.sin(radBeta) * 0.75
-        };
-      }
-    };
-
-    window.addEventListener('deviceorientation', handleOrientation);
-    return () => {
-      window.removeEventListener('deviceorientation', handleOrientation);
-    };
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
-
-    const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', handleResize);
-
-    const pills: PhysicsPill[] = [
-      {
-        x: width * 0.25,
-        y: height * 0.05,
-        vx: 1.2,
-        vy: 2.0,
-        width: 146,
-        height: 30,
-        angle: -0.15,
-        va: 0.02,
-        text: 'создано @temkazavr'
-      },
-      {
-        x: width * 0.6,
-        y: height * -0.1,
-        vx: -1.0,
-        vy: 1.8,
-        width: 146,
-        height: 30,
-        angle: 0.2,
-        va: -0.015,
-        text: 'создано @temkazavr'
-      },
-      {
-        x: width * 0.45,
-        y: height * -0.25,
-        vx: 0.5,
-        vy: 1.5,
-        width: 146,
-        height: 30,
-        angle: 0.05,
-        va: 0.01,
-        text: 'создано @temkazavr'
-      }
-    ];
-
-    let animationFrameId: number;
-
-    const render = () => {
-      ctx.clearRect(0, 0, width, height);
-
-      const gx = gravityRef.current.x;
-      const gy = gravityRef.current.y;
-
-      pills.forEach((p) => {
-        p.vx += gx;
-        p.vy += gy;
-        p.vx *= 0.985;
-        p.vy *= 0.985;
-        p.x += p.vx;
-        p.y += p.vy;
-        p.angle += p.va;
-        p.va *= 0.98;
-
-        const halfW = p.width / 2;
-        const halfH = p.height / 2;
-
-        if (p.x - halfW < 12) {
-          p.x = 12 + halfW;
-          p.vx = -p.vx * 0.55;
-          p.va = (Math.random() - 0.5) * 0.04;
-        } else if (p.x + halfW > width - 12) {
-          p.x = width - 12 - halfW;
-          p.vx = -p.vx * 0.55;
-          p.va = (Math.random() - 0.5) * 0.04;
-        }
-
-        if (p.y - halfH < 12) {
-          p.y = 12 + halfH;
-          p.vy = -p.vy * 0.55;
-          p.va = (Math.random() - 0.5) * 0.04;
-        } else if (p.y + halfH > height - 16) {
-          p.y = height - 16 - halfH;
-          p.vy = -p.vy * 0.55;
-          p.va = (Math.random() - 0.5) * 0.04;
-        }
-
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.angle);
-
-        ctx.beginPath();
-        const r = halfH;
-        ctx.roundRect(-halfW, -halfH, p.width, p.height, r);
-        ctx.fillStyle = 'rgba(28, 30, 38, 0.82)';
-        ctx.fill();
-        ctx.lineWidth = 1.2;
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
-        ctx.stroke();
-
-        ctx.font = '600 11px -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.58)';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(p.text, 0, 1);
-
-        ctx.restore();
-      });
-
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    animationFrameId = requestAnimationFrame(render);
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', handleResize);
-    };
   }, []);
 
   const handleCreateRoom = () => {
@@ -260,16 +102,6 @@ export const App: React.FC = () => {
       </div>
 
       <div className="app-viewport">
-        <canvas
-          ref={canvasRef}
-          className="rules-physics-canvas"
-          style={{
-            opacity: progress,
-            pointerEvents: 'none',
-            transition: isDragging ? 'none' : 'opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)'
-          }}
-        />
-
         <main
           className="screen-container main-content-wrapper"
           style={{
@@ -289,9 +121,9 @@ export const App: React.FC = () => {
 
           <div className="text-group">
             <h1 className="hero-title">
-              Загадай суперсилу, а друг подберет{' '}
-              <span className="title-nowrap-bundle">
-                дебафф!
+              <span>Загадай суперсилу,</span>
+              <span className="hero-title-second-row">
+                а друг подберет дебафф!
                 <img src="/purple.png" alt="" className="inline-title-emoji" />
               </span>
             </h1>
