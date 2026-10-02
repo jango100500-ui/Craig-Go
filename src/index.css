@@ -62,8 +62,18 @@ html, body {
   overflow: hidden;
 }
 
+.rules-physics-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
 .main-content-wrapper {
   will-change: transform, opacity;
+  z-index: 3;
 }
 
 .screen-container {
@@ -147,15 +157,16 @@ html, body {
   color: var(--text-primary);
 }
 
-.title-keep-together {
+.title-nowrap-bundle {
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .inline-title-emoji {
-  width: 24px;
-  height: 24px;
+  width: 25px;
+  height: 25px;
   display: inline-block;
   margin-left: 6px;
   object-fit: contain;
@@ -224,7 +235,7 @@ html, body {
   letter-spacing: 0.02em;
 }
 
-.rules-sheet-flow {
+.rules-view-container {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -235,6 +246,7 @@ html, body {
   align-items: center;
   gap: 14px;
   will-change: transform, opacity;
+  z-index: 4;
 }
 
 .rules-sheet-box {
@@ -245,59 +257,35 @@ html, body {
   padding: 22px 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   text-align: left;
 }
 
 .rules-section-item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .rules-heading {
   font-family: 'Nunito', sans-serif;
-  font-size: 1.12rem;
+  font-size: 1.15rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: #ffffff;
 }
 
 .rules-paragraph {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 400;
-  line-height: 1.42;
+  line-height: 1.44;
   letter-spacing: -0.01em;
   color: rgba(255, 255, 255, 0.74);
 }
 
-.full-width-report-btn {
+.rules-report-btn {
+  width: 100%;
   max-width: 100%;
-  width: 100%;
-  padding: 14px 20px;
-  font-size: 1.05rem;
-}
-
-.sandbox-wrapper {
-  width: 100%;
-  height: 94px;
-  border-radius: 20px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.jelly-sandbox-canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-  touch-action: none;
-  cursor: grab;
-}
-
-.jelly-sandbox-canvas:active {
-  cursor: grabbing;
 }
 
 .bottom-pull-interactive-zone {
