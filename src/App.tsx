@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LottieIcon } from './components/LottieIcon';
 
-const MAX_PULL = 340;
-const THRESHOLD = 110;
+const MAX_PULL = 320;
+const THRESHOLD = 100;
 
 export const App: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -87,14 +87,10 @@ export const App: React.FC = () => {
   const progress = Math.min(1, Math.max(0, activeDistance / MAX_PULL));
 
   let bottomPromptText = 'Как играть?';
-  if (!isOpen) {
-    if (activeDistance > 115) {
-      bottomPromptText = 'Еще чуток!';
-    } else if (activeDistance > 35) {
-      bottomPromptText = 'Да-да, тяни';
-    }
-  } else {
-    bottomPromptText = 'Потяни вниз, чтобы свернуть';
+  if (activeDistance > 115) {
+    bottomPromptText = 'Еще чуток!';
+  } else if (activeDistance > 35) {
+    bottomPromptText = 'Да-да, тяни';
   }
 
   return (
@@ -108,10 +104,10 @@ export const App: React.FC = () => {
         <main
           className="screen-container main-content-wrapper"
           style={{
-            transform: `translateY(-${progress * 130}px) scale(${1 - progress * 0.08})`,
-            opacity: 1 - progress * 0.9,
-            transition: isDragging ? 'none' : 'transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1)',
-            pointerEvents: progress > 0.4 ? 'none' : 'auto'
+            transform: `translateY(-${progress * 110}vh)`,
+            opacity: 1 - progress * 1.2,
+            transition: isDragging ? 'none' : 'transform 0.44s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.44s cubic-bezier(0.16, 1, 0.3, 1)',
+            pointerEvents: progress > 0.3 ? 'none' : 'auto'
           }}
         >
           <div className="animation-slot">
@@ -156,10 +152,10 @@ export const App: React.FC = () => {
         <section
           className="rules-sheet-box"
           style={{
-            transform: `translate(-50%, ${100 - progress * 100}%)`,
-            opacity: Math.min(1, progress * 1.3),
-            transition: isDragging ? 'none' : 'transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1)',
-            pointerEvents: progress < 0.2 ? 'none' : 'auto'
+            transform: `translate(-50%, calc(-50% + ${(1 - progress) * 110}vh))`,
+            opacity: progress,
+            transition: isDragging ? 'none' : 'transform 0.44s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.44s cubic-bezier(0.16, 1, 0.3, 1)',
+            pointerEvents: progress < 0.7 ? 'none' : 'auto'
           }}
         >
           <div className="rules-section-item">
@@ -178,15 +174,39 @@ export const App: React.FC = () => {
         </section>
 
         <div
-          className="bottom-pull-interactive-zone"
+          className="top-pull-interactive-zone"
+          style={{
+            opacity: progress,
+            pointerEvents: progress > 0.7 ? 'auto' : 'none',
+            transform: `translateY(${(1 - progress) * -40}px)`,
+            transition: isDragging ? 'none' : 'transform 0.44s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.44s cubic-bezier(0.16, 1, 0.3, 1)'
+          }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           onClick={() => {
-            if (!isDragging) {
-              setIsOpen((prev) => !prev);
-              setPullDistance((prev) => (prev > 0 ? 0 : MAX_PULL));
-            }
+            setIsOpen(false);
+            setPullDistance(0);
+          }}
+        >
+          <span className="pull-interactive-text">Потяни вниз, чтобы закрыть</span>
+          <div className="pull-drag-pill" />
+        </div>
+
+        <div
+          className="bottom-pull-interactive-zone"
+          style={{
+            opacity: 1 - progress,
+            pointerEvents: progress > 0.3 ? 'none' : 'auto',
+            transform: `translateY(${progress * 40}px)`,
+            transition: isDragging ? 'none' : 'transform 0.44s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.44s cubic-bezier(0.16, 1, 0.3, 1)'
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onClick={() => {
+            setIsOpen(true);
+            setPullDistance(MAX_PULL);
           }}
         >
           <div className="pull-drag-pill" />
