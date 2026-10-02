@@ -62,15 +62,6 @@ html, body {
   overflow: hidden;
 }
 
-.rules-physics-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-}
-
 .main-content-wrapper {
   will-change: transform, opacity;
   z-index: 3;
@@ -83,7 +74,7 @@ html, body {
   justify-content: center;
   width: 100%;
   max-width: 360px;
-  padding: 0 24px;
+  padding: 0 16px;
   text-align: center;
 }
 
@@ -150,18 +141,22 @@ html, body {
 }
 
 .hero-title {
-  font-size: 1.62rem;
+  font-size: 1.55rem;
   font-weight: 700;
   letter-spacing: -0.03em;
-  line-height: 1.22;
+  line-height: 1.25;
   color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
-.title-nowrap-bundle {
+.hero-title-second-row {
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  vertical-align: middle;
+  justify-content: center;
 }
 
 .inline-title-emoji {
