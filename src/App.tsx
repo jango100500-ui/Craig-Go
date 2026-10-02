@@ -16,7 +16,7 @@ export const App: React.FC = () => {
     }
   };
 
-  const handlePlayOffline = () => {
+  const handleRoomsList = () => {
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       navigator.vibrate(25);
     }
@@ -40,10 +40,11 @@ export const App: React.FC = () => {
 
         <div className="text-group">
           <h1 className="hero-title">
-            Привет! Создай комнату или сыграй с ии
+            Загадай суперсилу, а друг подберет дебафф!
+            <img src="/purple.png" alt="" className="inline-title-emoji" />
           </h1>
           <p className="hero-subtitle">
-            Создай комнату чтобы играть с реальным игроком или сыграй с нейросетью
+            Но для этого нужно вступить в комнату, или создать свою и позвать друзей, хехе
           </p>
         </div>
 
@@ -59,9 +60,9 @@ export const App: React.FC = () => {
           <button 
             type="button" 
             className="ios-glass-btn"
-            onClick={handlePlayOffline}
+            onClick={handleRoomsList}
           >
-            Играть оффлайн
+            Список комнат
           </button>
         </div>
 
