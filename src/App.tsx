@@ -10,6 +10,9 @@ export const App: React.FC = () => {
   const [pullDistance, setPullDistance] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
+  const [isOnboardingVisible, setIsOnboardingVisible] = useState(false);
+  const [nickname, setNickname] = useState('');
+
   const startYRef = useRef(0);
   const currentPullRef = useRef(0);
 
@@ -19,6 +22,12 @@ export const App: React.FC = () => {
         .lock('portrait')
         .catch(() => {});
     }
+
+    const timer = setTimeout(() => {
+      setIsOnboardingVisible(true);
+    }, 180);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleCreateRoom = () => {
@@ -33,14 +42,24 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleNextStep = () => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(25);
+    }
+    if (nickname.trim()) {
+      setIsOnboardingVisible(false);
+    }
+  };
+
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (isOnboardingVisible) return;
     startYRef.current = e.touches[0].clientY;
     currentPullRef.current = isOpen ? MAX_PULL : 0;
     setIsDragging(true);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || isOnboardingVisible) return;
     const currentY = e.touches[0].clientY;
     const rawDeltaY = (startYRef.current - currentY) * DRAG_RESISTANCE;
 
@@ -56,7 +75,7 @@ export const App: React.FC = () => {
   };
 
   const handleTouchEnd = () => {
-    if (!isDragging) return;
+    if (!isDragging || isOnboardingVisible) return;
     setIsDragging(false);
 
     if (!isOpen) {
@@ -101,14 +120,14 @@ export const App: React.FC = () => {
         <p>Приложение работает только в вертикальном режиме</p>
       </div>
 
-      <div className="app-viewport">
+      <div className={`app-viewport ${isOnboardingVisible ? 'background-dimmed-bw' : ''}`}>
         <main
           className="screen-container main-content-wrapper"
           style={{
             transform: `translateY(-${progress * 115}vh)`,
             opacity: 1 - progress * 1.15,
             transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)',
-            pointerEvents: progress > 0.35 ? 'none' : 'auto'
+            pointerEvents: progress > 0.35 || isOnboardingVisible ? 'none' : 'auto'
           }}
         >
           <div className="animation-slot">
@@ -159,7 +178,7 @@ export const App: React.FC = () => {
             transform: `translate(-50%, calc(-50% + ${(1 - progress) * 115}vh))`,
             opacity: progress,
             transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)',
-            pointerEvents: progress < 0.65 ? 'none' : 'auto'
+            pointerEvents: progress < 0.65 || isOnboardingVisible ? 'none' : 'auto'
           }}
         >
           <section className="rules-sheet-box">
@@ -187,44 +206,86 @@ export const App: React.FC = () => {
           </button>
         </div>
 
-        <div
-          className="top-pull-interactive-zone"
-          style={{
-            opacity: progress,
-            pointerEvents: progress > 0.65 ? 'auto' : 'none',
-            transform: `translateY(${(1 - progress) * -35}px)`,
-            transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)'
-          }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onClick={() => {
-            setIsOpen(false);
-            setPullDistance(0);
-          }}
-        >
-          <div className="pull-drag-pill" />
-          <span className="pull-interactive-text">Потяни вниз, чтобы закрыть</span>
+        {!isOnboardingVisible && (
+          <>
+            <div
+              className="top-pull-interactive-zone"
+              style={{
+                opacity: progress,
+                pointerEvents: progress > 0.65 ? 'auto' : 'none',
+                transform: `translateY(${(1 - progress) * -35}px)`,
+                transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)'
+              }}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onClick={() => {
+                setIsOpen(false);
+                setPullDistance(0);
+              }}
+            >
+              <div className="pull-drag-pill" />
+              <span className="pull-interactive-text">Потяни вниз, чтобы закрыть</span>
+            </div>
+
+            <div
+              className="bottom-pull-interactive-zone"
+              style={{
+                opacity: 1 - progress,
+                pointerEvents: progress > 0.35 ? 'none' : 'auto',
+                transform: `translateY(${progress * 35}px)`,
+                transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)'
+              }}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onClick={() => {
+                setIsOpen(true);
+                setPullDistance(MAX_PULL);
+              }}
+            >
+              <div className="pull-drag-pill" />
+              <span className="pull-interactive-text">{bottomPromptText}</span>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className={`onboarding-modal-card ${isOnboardingVisible ? 'visible' : ''}`}>
+        <div className="onboarding-text-block">
+          <h2 className="onboarding-title">Давай познакомимся!</h2>
+          <p className="onboarding-subtitle">
+            Я Крегг - а как тебя звать? *Выбранный тобой никнейм будет виден другим игрокам
+          </p>
         </div>
 
-        <div
-          className="bottom-pull-interactive-zone"
-          style={{
-            opacity: 1 - progress,
-            pointerEvents: progress > 0.35 ? 'none' : 'auto',
-            transform: `translateY(${progress * 35}px)`,
-            transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)'
-          }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onClick={() => {
-            setIsOpen(true);
-            setPullDistance(MAX_PULL);
-          }}
-        >
-          <div className="pull-drag-pill" />
-          <span className="pull-interactive-text">{bottomPromptText}</span>
+        <div className="onboarding-input-block">
+          <input
+            type="text"
+            className="onboarding-name-input"
+            placeholder="Моё имя"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            maxLength={24}
+          />
+          <span className="onboarding-input-hint">
+            Выбирай себе классный никнейм и давай продолжим!
+          </span>
+        </div>
+
+        <div className="onboarding-footer-row">
+          <span className="onboarding-step-counter">1/2</span>
+
+          <button
+            type="button"
+            className="onboarding-next-circle-btn"
+            onClick={handleNextStep}
+            aria-label="Далее"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
         </div>
       </div>
     </>
