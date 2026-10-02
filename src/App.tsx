@@ -4,6 +4,7 @@ import { LottieIcon } from './components/LottieIcon';
 const MAX_PULL = 440;
 const THRESHOLD = 140;
 const DRAG_RESISTANCE = 0.78;
+const WHEEL_STEP_PX = 76;
 
 const FALLBACK_AVATARS = [
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2387d50c"/><text x="50" y="58" font-size="34" font-family="sans-serif" text-anchor="middle" fill="%230b0c0f">🐊</text></svg>',
@@ -61,6 +62,8 @@ export const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const isValidNickname = nickname.trim().length >= 3 && nickname.trim().length <= 13;
+
   const handleCreateRoom = () => {
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       navigator.vibrate([20, 40, 20]);
@@ -74,6 +77,7 @@ export const App: React.FC = () => {
   };
 
   const handleNextOnboardingStep = () => {
+    if (!isValidNickname) return;
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       navigator.vibrate(25);
     }
@@ -154,19 +158,21 @@ export const App: React.FC = () => {
     if (!isSwipingWheel) return;
     setIsSwipingWheel(false);
 
-    const stepWidth = 60;
-    if (dragOffset < -stepWidth) {
-      setCurrentIndex((prev) => (prev + 1) % avatarsList.length);
-      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate(18);
-      }
-    } else if (dragOffset > stepWidth) {
-      setCurrentIndex((prev) => (prev - 1 + avatarsList.length) % avatarsList.length);
+    const shift = Math.round(-dragOffset / WHEEL_STEP_PX);
+    if (shift !== 0) {
+      setCurrentIndex((prev) => (prev + shift + avatarsList.length * 100) % avatarsList.length);
       if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
         navigator.vibrate(18);
       }
     }
     setDragOffset(0);
+  };
+
+  const handleSelectSlot = (itemIndex: number) => {
+    setCurrentIndex(itemIndex);
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(16);
+    }
   };
 
   const handleImageLoaded = (src: string) => {
@@ -183,8 +189,7 @@ export const App: React.FC = () => {
     bottomPromptText = 'Да-да, тяни';
   }
 
-  const normalizedDrag = Math.max(-1, Math.min(1, dragOffset / 110));
-
+  const offsetRatio = dragOffset / WHEEL_STEP_PX;
   const visibleOffsets = [-2, -1, 0, 1, 2];
 
   return (
@@ -336,14 +341,17 @@ export const App: React.FC = () => {
             </div>
 
             <div className="onboarding-input-block">
-              <input
-                type="text"
-                className="onboarding-name-input"
-                placeholder="Моё имя"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                maxLength={24}
-              />
+              <div className="onboarding-input-container">
+                <input
+                  type="text"
+                  className="onboarding-name-input"
+                  placeholder="Моё имя"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  maxLength={13}
+                />
+                <span className="onboarding-char-counter">{nickname.length}/13</span>
+              </div>
               <span className="onboarding-input-hint">
                 Выбирай себе классный никнейм и давай продолжим!
               </span>
@@ -354,8 +362,9 @@ export const App: React.FC = () => {
 
               <button
                 type="button"
-                className="onboarding-next-circle-btn"
+                className={`onboarding-next-circle-btn ${isValidNickname ? 'active' : 'disabled'}`}
                 onClick={handleNextOnboardingStep}
+                disabled={!isValidNickname}
                 aria-label="Далее"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
@@ -379,13 +388,14 @@ export const App: React.FC = () => {
                   const itemSrc = avatarsList[itemIndex];
                   const isLoaded = loadedImages[itemSrc];
 
-                  const effectiveOffset = offset - normalizedDrag;
+                  const effectiveOffset = offset + offsetRatio;
                   const absOffset = Math.abs(effectiveOffset);
 
-                  const xPos = effectiveOffset * 76;
-                  const yPos = Math.pow(absOffset, 1.8) * 11;
-                  const rotZ = effectiveOffset * 13;
-                  const scale = Math.max(0.68, 1 - absOffset * 0.17);
+                  const xPos = effectiveOffset * WHEEL_STEP_PX;
+                  const yPos = Math.pow(absOffset, 1.8) * 12;
+                  const rotZ = effectiveOffset * 14;
+                  const scale = Math.max(0.64, 1 - absOffset * 0.18);
+                  const blur = Math.min(6, absOffset * 2.2);
                   const opacity = Math.max(0, 1 - absOffset * 0.42);
 
                   return (
@@ -395,19 +405,13 @@ export const App: React.FC = () => {
                       style={{
                         transform: `translate3d(${xPos}px, ${yPos}px, 0) rotate(${rotZ}deg) scale(${scale})`,
                         opacity,
+                        filter: `blur(${blur}px)`,
                         zIndex: Math.round(10 - absOffset * 2),
                         transition: isSwipingWheel
                           ? 'none'
-                          : 'transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1)'
+                          : 'transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1), filter 0.38s cubic-bezier(0.16, 1, 0.3, 1)'
                       }}
-                      onClick={() => {
-                        if (offset !== 0) {
-                          setCurrentIndex(itemIndex);
-                          if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-                            navigator.vibrate(15);
-                          }
-                        }
-                      }}
+                      onClick={() => handleSelectSlot(itemIndex)}
                     >
                       <div className="avatar-capsule-box">
                         {!isLoaded && <div className="avatar-loading-skeleton" />}
