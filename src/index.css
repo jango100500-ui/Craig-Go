@@ -402,9 +402,16 @@ html, body {
   text-align: left;
 }
 
+.onboarding-input-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
 .onboarding-name-input {
   width: 100%;
-  padding: 15px 22px;
+  padding: 15px 56px 15px 22px;
   background: var(--bg-color);
   border: none;
   border-radius: 9999px;
@@ -417,6 +424,16 @@ html, body {
 
 .onboarding-name-input::placeholder {
   color: rgba(255, 255, 255, 0.35);
+}
+
+.onboarding-char-counter {
+  position: absolute;
+  right: 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
 }
 
 .onboarding-input-hint {
@@ -446,20 +463,29 @@ html, body {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--green-accent);
-  border: 1px solid var(--green-border);
-  color: #0b0c0f;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   outline: none;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.15s ease, background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
-.onboarding-next-circle-btn:active {
+.onboarding-next-circle-btn.active {
+  background: var(--green-accent);
+  border: 1px solid var(--green-border);
+  color: #0b0c0f;
+  cursor: pointer;
+}
+
+.onboarding-next-circle-btn.active:active {
   transform: scale(0.92);
-  opacity: 0.9;
+}
+
+.onboarding-next-circle-btn.disabled {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.25);
+  cursor: not-allowed;
 }
 
 .circular-carousel-stage {
@@ -493,7 +519,8 @@ html, body {
   left: 0;
   width: 56px;
   height: 56px;
-  will-change: transform, opacity;
+  cursor: pointer;
+  will-change: transform, opacity, filter;
 }
 
 .avatar-capsule-box {
