@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LottieIcon } from './components/LottieIcon';
+import { JellySandbox } from './components/JellySandbox';
 
 const MAX_PULL = 440;
 const THRESHOLD = 140;
@@ -121,8 +122,11 @@ export const App: React.FC = () => {
 
           <div className="text-group">
             <h1 className="hero-title">
-              Загадай суперсилу, а друг подберет дебафф!
-              <img src="/purple.png" alt="" className="inline-title-emoji" />
+              Загадай суперсилу, а друг подберет{' '}
+              <span className="title-keep-together">
+                дебафф!
+                <img src="/purple.png" alt="" className="inline-title-emoji" />
+              </span>
             </h1>
             <p className="hero-subtitle">
               Но для этого нужно вступить в комнату, или создать свою и позвать друзей, хехе
@@ -151,7 +155,7 @@ export const App: React.FC = () => {
         </main>
 
         <section
-          className="rules-sheet-box"
+          className="rules-sheet-flow"
           style={{
             transform: `translate(-50%, calc(-50% + ${(1 - progress) * 115}vh))`,
             opacity: progress,
@@ -159,18 +163,31 @@ export const App: React.FC = () => {
             pointerEvents: progress < 0.65 ? 'none' : 'auto'
           }}
         >
-          <div className="rules-section-item">
-            <h2 className="rules-heading">А как играть-то?</h2>
-            <p className="rules-paragraph">
-              Каждый игрок сначала получит карточку, в которую нужно придумать и вписать суперсилу. А потом Крегг перемешает ваши карточки так, что нужно будет придумать дебафф для этой суперсилы. В конце игры - получится классный коллаж, который к тому же можно сохранить на память!
-            </p>
+          <div className="rules-sheet-box">
+            <div className="rules-section-item">
+              <h2 className="rules-heading">А как играть-то?</h2>
+              <p className="rules-paragraph">
+                Каждый игрок сначала получит карточку, в которую нужно придумать и вписать суперсилу. А потом Крегг перемешает ваши карточки так, что нужно будет придумать дебафф для этой суперсилы. В конце игры - получится классный коллаж, который к тому же можно сохранить на память!
+              </p>
+            </div>
+
+            <div className="rules-section-item">
+              <h2 className="rules-heading">Правила игры</h2>
+              <p className="rules-paragraph">
+                Крегг не следит за играми и не модерирует их, а еще они нигде не хранятся. Так что единственное правило - веселиться!
+              </p>
+            </div>
           </div>
 
-          <div className="rules-section-item">
-            <h2 className="rules-heading">Правила игры</h2>
-            <p className="rules-paragraph">
-              Крегг не следит за играми и не модерирует их, а еще они нигде не хранятся. Так что единственное правило - веселиться!
-            </p>
+          <button 
+            type="button" 
+            className="ios-glass-btn green-accent-btn full-width-report-btn"
+          >
+            Репорт
+          </button>
+
+          <div className="sandbox-wrapper">
+            <JellySandbox />
           </div>
         </section>
 
