@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LottieIcon } from './components/LottieIcon';
 
-const MAX_PULL = 320;
-const THRESHOLD = 100;
+const MAX_PULL = 440;
+const THRESHOLD = 140;
+const DRAG_RESISTANCE = 0.78;
 
 export const App: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,14 +42,14 @@ export const App: React.FC = () => {
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
     const currentY = e.touches[0].clientY;
-    const deltaY = startYRef.current - currentY;
+    const rawDeltaY = (startYRef.current - currentY) * DRAG_RESISTANCE;
 
     if (!isOpen) {
-      const clamped = Math.max(0, Math.min(MAX_PULL, deltaY));
+      const clamped = Math.max(0, Math.min(MAX_PULL, rawDeltaY));
       currentPullRef.current = clamped;
       setPullDistance(clamped);
     } else {
-      const clamped = Math.max(0, Math.min(MAX_PULL, MAX_PULL + deltaY));
+      const clamped = Math.max(0, Math.min(MAX_PULL, MAX_PULL + rawDeltaY));
       currentPullRef.current = clamped;
       setPullDistance(clamped);
     }
@@ -87,9 +88,9 @@ export const App: React.FC = () => {
   const progress = Math.min(1, Math.max(0, activeDistance / MAX_PULL));
 
   let bottomPromptText = 'Как играть?';
-  if (activeDistance > 115) {
+  if (activeDistance > 160) {
     bottomPromptText = 'Еще чуток!';
-  } else if (activeDistance > 35) {
+  } else if (activeDistance > 45) {
     bottomPromptText = 'Да-да, тяни';
   }
 
@@ -104,10 +105,10 @@ export const App: React.FC = () => {
         <main
           className="screen-container main-content-wrapper"
           style={{
-            transform: `translateY(-${progress * 110}vh)`,
-            opacity: 1 - progress * 1.2,
-            transition: isDragging ? 'none' : 'transform 0.44s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.44s cubic-bezier(0.16, 1, 0.3, 1)',
-            pointerEvents: progress > 0.3 ? 'none' : 'auto'
+            transform: `translateY(-${progress * 115}vh)`,
+            opacity: 1 - progress * 1.15,
+            transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)',
+            pointerEvents: progress > 0.35 ? 'none' : 'auto'
           }}
         >
           <div className="animation-slot">
@@ -152,10 +153,10 @@ export const App: React.FC = () => {
         <section
           className="rules-sheet-box"
           style={{
-            transform: `translate(-50%, calc(-50% + ${(1 - progress) * 110}vh))`,
+            transform: `translate(-50%, calc(-50% + ${(1 - progress) * 115}vh))`,
             opacity: progress,
-            transition: isDragging ? 'none' : 'transform 0.44s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.44s cubic-bezier(0.16, 1, 0.3, 1)',
-            pointerEvents: progress < 0.7 ? 'none' : 'auto'
+            transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)',
+            pointerEvents: progress < 0.65 ? 'none' : 'auto'
           }}
         >
           <div className="rules-section-item">
@@ -177,9 +178,9 @@ export const App: React.FC = () => {
           className="top-pull-interactive-zone"
           style={{
             opacity: progress,
-            pointerEvents: progress > 0.7 ? 'auto' : 'none',
-            transform: `translateY(${(1 - progress) * -40}px)`,
-            transition: isDragging ? 'none' : 'transform 0.44s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.44s cubic-bezier(0.16, 1, 0.3, 1)'
+            pointerEvents: progress > 0.65 ? 'auto' : 'none',
+            transform: `translateY(${(1 - progress) * -35}px)`,
+            transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)'
           }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -189,17 +190,17 @@ export const App: React.FC = () => {
             setPullDistance(0);
           }}
         >
-          <span className="pull-interactive-text">Потяни вниз, чтобы закрыть</span>
           <div className="pull-drag-pill" />
+          <span className="pull-interactive-text">Потяни вниз, чтобы закрыть</span>
         </div>
 
         <div
           className="bottom-pull-interactive-zone"
           style={{
             opacity: 1 - progress,
-            pointerEvents: progress > 0.3 ? 'none' : 'auto',
-            transform: `translateY(${progress * 40}px)`,
-            transition: isDragging ? 'none' : 'transform 0.44s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.44s cubic-bezier(0.16, 1, 0.3, 1)'
+            pointerEvents: progress > 0.35 ? 'none' : 'auto',
+            transform: `translateY(${progress * 35}px)`,
+            transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)'
           }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
