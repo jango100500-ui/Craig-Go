@@ -5,16 +5,30 @@ const MAX_PULL = 440;
 const THRESHOLD = 140;
 const DRAG_RESISTANCE = 0.78;
 
+const AVATAR_LIST = [
+  '/avatars/1.png',
+  '/avatars/2.png',
+  '/avatars/3.png',
+  '/avatars/4.png',
+  '/avatars/5.png',
+  '/avatars/6.png'
+];
+
 export const App: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
   const [isOnboardingVisible, setIsOnboardingVisible] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState<1 | 2>(1);
   const [nickname, setNickname] = useState('');
+  const [selectedAvatarIdx, setSelectedAvatarIdx] = useState(0);
 
   const startYRef = useRef(0);
   const currentPullRef = useRef(0);
+  const carouselTouchStartX = useRef(0);
+  const [carouselDragX, setCarouselDragX] = useState(0);
+  const [isCarouselDragging, setIsCarouselDragging] = useState(false);
 
   useEffect(() => {
     if (window.screen?.orientation && 'lock' in window.screen.orientation) {
@@ -42,13 +56,18 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleNextStep = () => {
+  const handleNextOnboardingStep = () => {
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       navigator.vibrate(25);
     }
-    if (nickname.trim()) {
-      setIsOnboardingVisible(false);
+    setOnboardingStep(2);
+  };
+
+  const handleFinishOnboarding = () => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate([20, 40, 20]);
     }
+    setIsOnboardingVisible(false);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -103,6 +122,35 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleCarouselTouchStart = (e: React.TouchEvent) => {
+    carouselTouchStartX.current = e.touches[0].clientX;
+    setIsCarouselDragging(true);
+  };
+
+  const handleCarouselTouchMove = (e: React.TouchEvent) => {
+    if (!isCarouselDragging) return;
+    const deltaX = e.touches[0].clientX - carouselTouchStartX.current;
+    setCarouselDragX(deltaX);
+  };
+
+  const handleCarouselTouchEnd = () => {
+    if (!isCarouselDragging) return;
+    setIsCarouselDragging(false);
+
+    if (carouselDragX < -40) {
+      setSelectedAvatarIdx((prev) => (prev + 1) % AVATAR_LIST.length);
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        navigator.vibrate(15);
+      }
+    } else if (carouselDragX > 40) {
+      setSelectedAvatarIdx((prev) => (prev - 1 + AVATAR_LIST.length) % AVATAR_LIST.length);
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        navigator.vibrate(15);
+      }
+    }
+    setCarouselDragX(0);
+  };
+
   const activeDistance = isDragging ? pullDistance : isOpen ? MAX_PULL : 0;
   const progress = Math.min(1, Math.max(0, activeDistance / MAX_PULL));
 
@@ -112,6 +160,9 @@ export const App: React.FC = () => {
   } else if (activeDistance > 45) {
     bottomPromptText = 'Да-да, тяни';
   }
+
+  const prevIdx = (selectedAvatarIdx - 1 + AVATAR_LIST.length) % AVATAR_LIST.length;
+  const nextIdx = (selectedAvatarIdx + 1) % AVATAR_LIST.length;
 
   return (
     <>
@@ -252,41 +303,102 @@ export const App: React.FC = () => {
       </div>
 
       <div className={`onboarding-modal-card ${isOnboardingVisible ? 'visible' : ''}`}>
-        <div className="onboarding-text-block">
-          <h2 className="onboarding-title">Давай познакомимся!</h2>
-          <p className="onboarding-subtitle">
-            Я Крегг - а как тебя звать? *Выбранный тобой никнейм будет виден другим игрокам
-          </p>
-        </div>
+        {onboardingStep === 1 ? (
+          <>
+            <div className="onboarding-text-block">
+              <h2 className="onboarding-title">Давай познакомимся!</h2>
+              <p className="onboarding-subtitle">
+                Я Крегг - а как тебя звать? *Выбранный тобой никнейм будет виден другим игрокам
+              </p>
+            </div>
 
-        <div className="onboarding-input-block">
-          <input
-            type="text"
-            className="onboarding-name-input"
-            placeholder="Моё имя"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            maxLength={24}
-          />
-          <span className="onboarding-input-hint">
-            Выбирай себе классный никнейм и давай продолжим!
-          </span>
-        </div>
+            <div className="onboarding-input-block">
+              <input
+                type="text"
+                className="onboarding-name-input"
+                placeholder="Моё имя"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                maxLength={24}
+              />
+              <span className="onboarding-input-hint">
+                Выбирай себе классный никнейм и давай продолжим!
+              </span>
+            </div>
 
-        <div className="onboarding-footer-row">
-          <span className="onboarding-step-counter">1/2</span>
+            <div className="onboarding-footer-row">
+              <span className="onboarding-step-counter">1/2</span>
 
-          <button
-            type="button"
-            className="onboarding-next-circle-btn"
-            onClick={handleNextStep}
-            aria-label="Далее"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-        </div>
+              <button
+                type="button"
+                className="onboarding-next-circle-btn"
+                onClick={handleNextOnboardingStep}
+                aria-label="Далее"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div
+              className="avatar-wheel-container"
+              onTouchStart={handleCarouselTouchStart}
+              onTouchMove={handleCarouselTouchMove}
+              onTouchEnd={handleCarouselTouchEnd}
+            >
+              <div
+                className="avatar-wheel-track"
+                style={{
+                  transform: `translateX(${carouselDragX * 0.45}px)`,
+                  transition: isCarouselDragging ? 'none' : 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)'
+                }}
+              >
+                <div
+                  className="avatar-wheel-item side left"
+                  onClick={() => {
+                    setSelectedAvatarIdx(prevIdx);
+                    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                      navigator.vibrate(15);
+                    }
+                  }}
+                >
+                  <img src={AVATAR_LIST[prevIdx]} alt="" className="avatar-wheel-img" />
+                </div>
+
+                <div className="avatar-wheel-item active">
+                  <img src={AVATAR_LIST[selectedAvatarIdx]} alt="" className="avatar-wheel-img" />
+                </div>
+
+                <div
+                  className="avatar-wheel-item side right"
+                  onClick={() => {
+                    setSelectedAvatarIdx(nextIdx);
+                    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                      navigator.vibrate(15);
+                    }
+                  }}
+                >
+                  <img src={AVATAR_LIST[nextIdx]} alt="" className="avatar-wheel-img" />
+                </div>
+              </div>
+            </div>
+
+            <p className="onboarding-avatar-description">
+              Рад знакомству, {nickname.trim() || 'друг'}! Теперь выбери себе крутецкую аватарку
+            </p>
+
+            <button
+              type="button"
+              className="ios-glass-btn green-accent-btn onboarding-finish-btn"
+              onClick={handleFinishOnboarding}
+            >
+              Хочу эту
+            </button>
+          </>
+        )}
       </div>
     </>
   );
