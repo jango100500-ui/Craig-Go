@@ -1,17 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { LottieIcon } from './components/LottieIcon';
 
 const MAX_PULL = 440;
 const THRESHOLD = 140;
 const DRAG_RESISTANCE = 0.78;
 
-const AVATAR_LIST = [
-  '/avatars/1.png',
-  '/avatars/2.png',
-  '/avatars/3.png',
-  '/avatars/4.png',
-  '/avatars/5.png',
-  '/avatars/6.png'
+const FALLBACK_AVATARS = [
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2387d50c"/><text x="50" y="58" font-size="34" font-family="sans-serif" text-anchor="middle" fill="%230b0c0f">🐊</text></svg>',
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23a855f7"/><text x="50" y="58" font-size="34" font-family="sans-serif" text-anchor="middle" fill="%23ffffff">😈</text></svg>',
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%233b82f6"/><text x="50" y="58" font-size="34" font-family="sans-serif" text-anchor="middle" fill="%23ffffff">⚡</text></svg>',
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23ec4899"/><text x="50" y="58" font-size="34" font-family="sans-serif" text-anchor="middle" fill="%23ffffff">✨</text></svg>',
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23eab308"/><text x="50" y="58" font-size="34" font-family="sans-serif" text-anchor="middle" fill="%230b0c0f">🔥</text></svg>'
 ];
 
 export const App: React.FC = () => {
@@ -22,13 +21,31 @@ export const App: React.FC = () => {
   const [isOnboardingVisible, setIsOnboardingVisible] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState<1 | 2>(1);
   const [nickname, setNickname] = useState('');
-  const [selectedAvatarIdx, setSelectedAvatarIdx] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
 
   const startYRef = useRef(0);
   const currentPullRef = useRef(0);
-  const carouselTouchStartX = useRef(0);
-  const [carouselDragX, setCarouselDragX] = useState(0);
-  const [isCarouselDragging, setIsCarouselDragging] = useState(false);
+
+  const touchStartX = useRef(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isSwipingWheel, setIsSwipingWheel] = useState(false);
+
+  const avatarsList = useMemo(() => {
+    try {
+      const globFiles = import.meta.glob('/public/avatars/*.{png,jpg,jpeg,webp,svg,gif}', {
+        eager: true,
+        query: '?url',
+        import: 'default'
+      });
+      const resolvedPaths = Object.keys(globFiles).map((path) =>
+        path.replace(/^\/public/, '')
+      );
+      return resolvedPaths.length > 0 ? resolvedPaths : FALLBACK_AVATARS;
+    } catch {
+      return FALLBACK_AVATARS;
+    }
+  }, []);
 
   useEffect(() => {
     if (window.screen?.orientation && 'lock' in window.screen.orientation) {
@@ -122,33 +139,38 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleCarouselTouchStart = (e: React.TouchEvent) => {
-    carouselTouchStartX.current = e.touches[0].clientX;
-    setIsCarouselDragging(true);
+  const handleWheelTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    setIsSwipingWheel(true);
   };
 
-  const handleCarouselTouchMove = (e: React.TouchEvent) => {
-    if (!isCarouselDragging) return;
-    const deltaX = e.touches[0].clientX - carouselTouchStartX.current;
-    setCarouselDragX(deltaX);
+  const handleWheelTouchMove = (e: React.TouchEvent) => {
+    if (!isSwipingWheel) return;
+    const delta = e.touches[0].clientX - touchStartX.current;
+    setDragOffset(delta);
   };
 
-  const handleCarouselTouchEnd = () => {
-    if (!isCarouselDragging) return;
-    setIsCarouselDragging(false);
+  const handleWheelTouchEnd = () => {
+    if (!isSwipingWheel) return;
+    setIsSwipingWheel(false);
 
-    if (carouselDragX < -40) {
-      setSelectedAvatarIdx((prev) => (prev + 1) % AVATAR_LIST.length);
+    const stepWidth = 60;
+    if (dragOffset < -stepWidth) {
+      setCurrentIndex((prev) => (prev + 1) % avatarsList.length);
       if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate(15);
+        navigator.vibrate(18);
       }
-    } else if (carouselDragX > 40) {
-      setSelectedAvatarIdx((prev) => (prev - 1 + AVATAR_LIST.length) % AVATAR_LIST.length);
+    } else if (dragOffset > stepWidth) {
+      setCurrentIndex((prev) => (prev - 1 + avatarsList.length) % avatarsList.length);
       if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate(15);
+        navigator.vibrate(18);
       }
     }
-    setCarouselDragX(0);
+    setDragOffset(0);
+  };
+
+  const handleImageLoaded = (src: string) => {
+    setLoadedImages((prev) => ({ ...prev, [src]: true }));
   };
 
   const activeDistance = isDragging ? pullDistance : isOpen ? MAX_PULL : 0;
@@ -161,8 +183,9 @@ export const App: React.FC = () => {
     bottomPromptText = 'Да-да, тяни';
   }
 
-  const prevIdx = (selectedAvatarIdx - 1 + AVATAR_LIST.length) % AVATAR_LIST.length;
-  const nextIdx = (selectedAvatarIdx + 1) % AVATAR_LIST.length;
+  const normalizedDrag = Math.max(-1, Math.min(1, dragOffset / 110));
+
+  const visibleOffsets = [-2, -1, 0, 1, 2];
 
   return (
     <>
@@ -344,45 +367,60 @@ export const App: React.FC = () => {
         ) : (
           <>
             <div
-              className="avatar-wheel-container"
-              onTouchStart={handleCarouselTouchStart}
-              onTouchMove={handleCarouselTouchMove}
-              onTouchEnd={handleCarouselTouchEnd}
+              className="circular-carousel-stage"
+              onTouchStart={handleWheelTouchStart}
+              onTouchMove={handleWheelTouchMove}
+              onTouchEnd={handleWheelTouchEnd}
             >
-              <div
-                className="avatar-wheel-track"
-                style={{
-                  transform: `translateX(${carouselDragX * 0.45}px)`,
-                  transition: isCarouselDragging ? 'none' : 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)'
-                }}
-              >
-                <div
-                  className="avatar-wheel-item side left"
-                  onClick={() => {
-                    setSelectedAvatarIdx(prevIdx);
-                    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-                      navigator.vibrate(15);
-                    }
-                  }}
-                >
-                  <img src={AVATAR_LIST[prevIdx]} alt="" className="avatar-wheel-img" />
-                </div>
+              <div className="circular-carousel-wheel">
+                {visibleOffsets.map((offset) => {
+                  const itemIndex =
+                    (currentIndex + offset + avatarsList.length * 100) % avatarsList.length;
+                  const itemSrc = avatarsList[itemIndex];
+                  const isLoaded = loadedImages[itemSrc];
 
-                <div className="avatar-wheel-item active">
-                  <img src={AVATAR_LIST[selectedAvatarIdx]} alt="" className="avatar-wheel-img" />
-                </div>
+                  const effectiveOffset = offset - normalizedDrag;
+                  const absOffset = Math.abs(effectiveOffset);
 
-                <div
-                  className="avatar-wheel-item side right"
-                  onClick={() => {
-                    setSelectedAvatarIdx(nextIdx);
-                    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-                      navigator.vibrate(15);
-                    }
-                  }}
-                >
-                  <img src={AVATAR_LIST[nextIdx]} alt="" className="avatar-wheel-img" />
-                </div>
+                  const xPos = effectiveOffset * 76;
+                  const yPos = Math.pow(absOffset, 1.8) * 11;
+                  const rotZ = effectiveOffset * 13;
+                  const scale = Math.max(0.68, 1 - absOffset * 0.17);
+                  const opacity = Math.max(0, 1 - absOffset * 0.42);
+
+                  return (
+                    <div
+                      key={`${offset}-${itemSrc}`}
+                      className={`carousel-arch-slot ${absOffset < 0.45 ? 'centered-active' : ''}`}
+                      style={{
+                        transform: `translate3d(${xPos}px, ${yPos}px, 0) rotate(${rotZ}deg) scale(${scale})`,
+                        opacity,
+                        zIndex: Math.round(10 - absOffset * 2),
+                        transition: isSwipingWheel
+                          ? 'none'
+                          : 'transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1)'
+                      }}
+                      onClick={() => {
+                        if (offset !== 0) {
+                          setCurrentIndex(itemIndex);
+                          if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                            navigator.vibrate(15);
+                          }
+                        }
+                      }}
+                    >
+                      <div className="avatar-capsule-box">
+                        {!isLoaded && <div className="avatar-loading-skeleton" />}
+                        <img
+                          src={itemSrc}
+                          alt=""
+                          className={`avatar-box-image ${isLoaded ? 'ready' : 'loading'}`}
+                          onLoad={() => handleImageLoaded(itemSrc)}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
