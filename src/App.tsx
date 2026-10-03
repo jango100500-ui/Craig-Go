@@ -197,6 +197,8 @@ export const App: React.FC = () => {
   const offsetRatio = dragOffset / WHEEL_STEP_PX;
   const visibleOffsets = [-2, -1, 0, 1, 2];
 
+  const currentAvatar = avatarsList[currentIndex] || FALLBACK_AVATARS[0];
+
   return (
     <>
       <div className="landscape-lock-overlay">
@@ -205,7 +207,11 @@ export const App: React.FC = () => {
       </div>
 
       {currentScreen === 'create-room' ? (
-        <CreateRoomScreen onBack={() => setCurrentScreen('home')} />
+        <CreateRoomScreen
+          onBack={() => setCurrentScreen('home')}
+          playerNickname={nickname}
+          playerAvatar={currentAvatar}
+        />
       ) : (
         <div className={`app-viewport ${isOnboardingVisible ? 'background-dimmed-bw' : ''}`}>
           <main
