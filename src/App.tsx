@@ -219,135 +219,137 @@ export const App: React.FC = () => {
       )}
 
       {currentScreen === 'home' && (
-        <div className={`app-viewport ${isOnboardingVisible ? 'background-dimmed-bw' : ''}`}>
-          <main
-            className="screen-container main-content-wrapper"
-            style={{
-              transform: `translateY(-${progress * 115}vh)`,
-              opacity: 1 - progress * 1.15,
-              transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)',
-              pointerEvents: progress > 0.35 || isOnboardingVisible ? 'none' : 'auto'
-            }}
-          >
-            <div className="animation-slot">
-              <LottieIcon 
-                src="/Hi.json" 
-                className="home-lottie-host" 
-                fallbackClass="ios-skeleton-box" 
-              />
-            </div>
-
-            <div className="text-group">
-              <h1 className="hero-title">
-                <span>Загадай суперсилу,</span>
-                <span className="hero-title-second-row">
-                  а друг подберет дебафф!
-                  <img src="/purple.png" alt="" className="inline-title-emoji" />
-                </span>
-              </h1>
-              <p className="hero-subtitle">
-                Но для этого нужно вступить в комнату, или создать свою и позвать друзей, хехе
-              </p>
-            </div>
-
-            <div className="action-buttons-group">
-              <button 
-                type="button" 
-                className="ios-glass-btn green-accent-btn"
-                onClick={handleCreateRoom}
-              >
-                Создать комнату
-              </button>
-
-              <button 
-                type="button" 
-                className="ios-glass-btn"
-                onClick={handleRoomsList}
-              >
-                Список комнат
-              </button>
-            </div>
-
-            <span className="author-tagline">Создано @temkazavr</span>
-          </main>
-
-          <div
-            className="rules-view-container"
-            style={{
-              transform: `translate(-50%, calc(-50% + ${(1 - progress) * 115}vh))`,
-              opacity: progress,
-              transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)',
-              pointerEvents: progress < 0.65 || isOnboardingVisible ? 'none' : 'auto'
-            }}
-          >
-            <section className="rules-sheet-box">
-              <div className="rules-section-item">
-                <h2 className="rules-heading">А как играть-то?</h2>
-                <p className="rules-paragraph">
-                  Каждый игрок сначала получит карточку, в которую нужно придумать и вписать суперсилу. А потом Крегг перемешает ваши карточки так, что нужно будет придумать дебафф для этой суперсилы. В конце игры - получится классный коллаж, который к тому же можно сохранить на память!
-                </p>
-              </div>
-
-              <div className="rules-section-item">
-                <h2 className="rules-heading">Правила игры</h2>
-                <p className="rules-paragraph">
-                  Крегг не следит за играми и не модерирует их, а еще они нигде не хранятся. Так что единственное правило - веселиться!
-                </p>
-              </div>
-            </section>
-
-            <button
-              type="button"
-              className="ios-glass-btn green-accent-btn rules-report-btn"
-              onClick={() => {}}
+        <>
+          <div className={`app-viewport ${isOnboardingVisible ? 'background-dimmed-bw' : ''}`}>
+            <main
+              className="screen-container main-content-wrapper"
+              style={{
+                transform: `translateY(-${progress * 115}vh)`,
+                opacity: 1 - progress * 1.15,
+                transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)',
+                pointerEvents: progress > 0.35 || isOnboardingVisible ? 'none' : 'auto'
+              }}
             >
-              Репорт
-            </button>
+              <div className="animation-slot">
+                <LottieIcon 
+                  src="/Hi.json" 
+                  className="home-lottie-host" 
+                  fallbackClass="ios-skeleton-box" 
+                />
+              </div>
+
+              <div className="text-group">
+                <h1 className="hero-title">
+                  <span>Загадай суперсилу,</span>
+                  <span className="hero-title-second-row">
+                    а друг подберет дебафф!
+                    <img src="/purple.png" alt="" className="inline-title-emoji" />
+                  </span>
+                </h1>
+                <p className="hero-subtitle">
+                  Но для этого нужно вступить в комнату, или создать свою и позвать друзей, хехе
+                </p>
+              </div>
+
+              <div className="action-buttons-group">
+                <button 
+                  type="button" 
+                  className="ios-glass-btn green-accent-btn"
+                  onClick={handleCreateRoom}
+                >
+                  Создать комнату
+                </button>
+
+                <button 
+                  type="button" 
+                  className="ios-glass-btn"
+                  onClick={handleRoomsList}
+                >
+                  Список комнат
+                </button>
+              </div>
+
+              <span className="author-tagline">Создано @temkazavr</span>
+            </main>
+
+            <div
+              className="rules-view-container"
+              style={{
+                transform: `translate(-50%, calc(-50% + ${(1 - progress) * 115}vh))`,
+                opacity: progress,
+                transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)',
+                pointerEvents: progress < 0.65 || isOnboardingVisible ? 'none' : 'auto'
+              }}
+            >
+              <section className="rules-sheet-box">
+                <div className="rules-section-item">
+                  <h2 className="rules-heading">А как играть-то?</h2>
+                  <p className="rules-paragraph">
+                    Каждый игрок сначала получит карточку, в которую нужно придумать и вписать суперсилу. А потом Крегг перемешает ваши карточки так, что нужно будет придумать дебафф для этой суперсилы. В конце игры - получится классный коллаж, который к тому же можно сохранить на память!
+                  </p>
+                </div>
+
+                <div className="rules-section-item">
+                  <h2 className="rules-heading">Правила игры</h2>
+                  <p className="rules-paragraph">
+                    Крегг не следит за играми и не модерирует их, а еще они нигде не хранятся. Так что единственное правило - веселиться!
+                  </p>
+                </div>
+              </section>
+
+              <button
+                type="button"
+                className="ios-glass-btn green-accent-btn rules-report-btn"
+                onClick={() => {}}
+              >
+                Репорт
+              </button>
+            </div>
+
+            {!isOnboardingVisible && (
+              <>
+                <div
+                  className="top-pull-interactive-zone"
+                  style={{
+                    opacity: progress,
+                    pointerEvents: progress > 0.65 ? 'auto' : 'none',
+                    transform: `translateY(${(1 - progress) * -35}px)`,
+                    transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)'
+                  }}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  onClick={() => {
+                    setIsOpen(false);
+                    setPullDistance(0);
+                  }}
+                >
+                  <div className="pull-drag-pill" />
+                  <span className="pull-interactive-text">Потяни вниз, чтобы закрыть</span>
+                </div>
+
+                <div
+                  className="bottom-pull-interactive-zone"
+                  style={{
+                    opacity: 1 - progress,
+                    pointerEvents: progress > 0.35 ? 'none' : 'auto',
+                    transform: `translateY(${progress * 35}px)`,
+                    transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)'
+                  }}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  onClick={() => {
+                    setIsOpen(true);
+                    setPullDistance(MAX_PULL);
+                  }}
+                >
+                  <div className="pull-drag-pill" />
+                  <span className="pull-interactive-text">{bottomPromptText}</span>
+                </div>
+              </>
+            )}
           </div>
-
-          {!isOnboardingVisible && (
-            <>
-              <div
-                className="top-pull-interactive-zone"
-                style={{
-                  opacity: progress,
-                  pointerEvents: progress > 0.65 ? 'auto' : 'none',
-                  transform: `translateY(${(1 - progress) * -35}px)`,
-                  transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)'
-                }}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onClick={() => {
-                  setIsOpen(false);
-                  setPullDistance(0);
-                }}
-              >
-                <div className="pull-drag-pill" />
-                <span className="pull-interactive-text">Потяни вниз, чтобы закрыть</span>
-              </div>
-
-              <div
-                className="bottom-pull-interactive-zone"
-                style={{
-                  opacity: 1 - progress,
-                  pointerEvents: progress > 0.35 ? 'none' : 'auto',
-                  transform: `translateY(${progress * 35}px)`,
-                  transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)'
-                }}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onClick={() => {
-                  setIsOpen(true);
-                  setPullDistance(MAX_PULL);
-                }}
-              >
-                <div className="pull-drag-pill" />
-                <span className="pull-interactive-text">{bottomPromptText}</span>
-              </div>
-            </>
-          )}
 
           <div className={`onboarding-modal-card ${isOnboardingVisible ? 'visible' : ''}`}>
             {onboardingStep === 1 ? (
@@ -461,7 +463,7 @@ export const App: React.FC = () => {
               </>
             )}
           </div>
-        </div>
+        </>
       )}
     </>
   );
