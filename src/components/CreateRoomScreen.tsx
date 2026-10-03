@@ -7,6 +7,16 @@ const ROOM_TITLES = [
   'Юр рум'
 ];
 
+const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+function generateRandomCode(): string {
+  let result = '';
+  for (let i = 0; i < 5; i++) {
+    result += CODE_CHARS.charAt(Math.floor(Math.random() * CODE_CHARS.length));
+  }
+  return result;
+}
+
 interface CreateRoomScreenProps {
   onBack: () => void;
   playerNickname: string;
@@ -22,10 +32,42 @@ export const CreateRoomScreen: React.FC<CreateRoomScreenProps> = ({
     return ROOM_TITLES[Math.floor(Math.random() * ROOM_TITLES.length)];
   });
 
+  const [roomCode] = useState(generateRandomCode);
+  const [isPublic, setIsPublic] = useState(false);
+  const [isCodeCopied, setIsCodeCopied] = useState(false);
+  const [isLinkCopied, setIsLinkCopied] = useState(false);
+
   const handleStartGame = () => {
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       navigator.vibrate([20, 40, 20]);
     }
+  };
+
+  const handleCopyCode = () => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(20);
+    }
+    navigator.clipboard.writeText(roomCode).then(() => {
+      setIsCodeCopied(true);
+      setTimeout(() => setIsCodeCopied(false), 2200);
+    });
+  };
+
+  const handleCopyLink = () => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(20);
+    }
+    navigator.clipboard.writeText(`https://craig.app/r/${roomCode}`).then(() => {
+      setIsLinkCopied(true);
+      setTimeout(() => setIsLinkCopied(false), 2200);
+    });
+  };
+
+  const handleTogglePublic = () => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(15);
+    }
+    setIsPublic((prev) => !prev);
   };
 
   const displayName = playerNickname.trim() || 'Ты';
@@ -102,21 +144,51 @@ export const CreateRoomScreen: React.FC<CreateRoomScreenProps> = ({
             <span className="slot-player-label">Ожидание…</span>
           </div>
         </div>
+
+        <div className="room-misc-card">
+          <div className="room-misc-row filled">
+            <span className="room-misc-title">Публичная комната</span>
+            <button
+              type="button"
+              className={`ios-switch-btn ${isPublic ? 'active' : ''}`}
+              onClick={handleTogglePublic}
+              aria-label="Включить публичную комнату"
+            >
+              <span className="ios-switch-thumb" />
+            </button>
+          </div>
+
+          <div className="room-misc-row transparent">
+            <span className="room-misc-title">Код комнаты</span>
+            <button
+              type="button"
+              className={`room-code-badge-btn ${isCodeCopied ? 'copied' : ''}`}
+              onClick={handleCopyCode}
+            >
+              {isCodeCopied ? 'Скопирован!' : roomCode}
+            </button>
+          </div>
+
+          <div className="room-misc-row filled">
+            <span className="room-misc-title">Ссылочка</span>
+            <button
+              type="button"
+              className={`room-link-badge-btn ${isLinkCopied ? 'copied' : ''}`}
+              onClick={handleCopyLink}
+            >
+              {isLinkCopied ? 'Скопировано!' : 'craig...'}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="create-room-bottom-actions">
         <button
           type="button"
-          className="ios-glass-btn green-accent-btn with-icon-btn"
+          className="ios-glass-btn green-accent-btn"
           onClick={handleStartGame}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
-          <span>Начать игру</span>
+          Начать игру
         </button>
 
         <button
