@@ -19,7 +19,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-input {
+input, textarea {
   -webkit-user-select: text;
   user-select: text;
 }
@@ -233,6 +233,47 @@ html, body {
 .green-accent-btn:active {
   opacity: 0.92;
   transform: scale(0.96);
+}
+
+.room-start-loading-btn {
+  background: var(--glass-bg) !important;
+  border-color: var(--glass-border) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+.button-loader-slider {
+  width: 100%;
+  max-width: 140px;
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+  position: relative;
+}
+
+.button-loader-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--green-accent);
+  border-radius: 99px;
+  animation: loadSlide 1.7s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes loadSlide {
+  0% {
+    width: 0%;
+  }
+  60% {
+    width: 72%;
+  }
+  100% {
+    width: 100%;
+  }
 }
 
 .author-tagline {
@@ -859,6 +900,125 @@ html, body {
   align-items: center;
   gap: 10px;
   margin-top: 18px;
+}
+
+.game-screen-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.game-countdown-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+}
+
+.countdown-number-jelly {
+  font-family: 'Nunito', sans-serif;
+  font-size: 5.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--green-accent);
+  display: inline-block;
+  animation: jellyPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.countdown-text-jelly {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  max-width: 290px;
+  line-height: 1.35;
+  animation: jellyPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.game-play-view {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.35s ease-out;
+}
+
+.game-accent-card {
+  position: relative;
+  width: 100%;
+  min-height: 240px;
+  border: 2px solid var(--green-accent);
+  border-radius: 28px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 18px 20px;
+}
+
+.game-card-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--green-accent);
+  color: #0b0c0f;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  padding: 4px 18px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.game-card-content-area {
+  width: 100%;
+  max-height: 220px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-card-content-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+.game-card-content-area::-webkit-scrollbar-thumb {
+  background: rgba(135, 213, 12, 0.4);
+  border-radius: 99px;
+}
+
+.game-power-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: center;
+  outline: none;
+  resize: none;
+}
+
+.game-power-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.32);
 }
 
 .landscape-lock-overlay {
