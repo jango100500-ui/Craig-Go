@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { LottieIcon } from './components/LottieIcon';
 import { CreateRoomScreen } from './components/CreateRoomScreen';
+import { GameScreen } from './components/GameScreen';
 
 const MAX_PULL = 440;
 const THRESHOLD = 140;
@@ -15,7 +16,7 @@ const FALLBACK_AVATARS = [
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23eab308"/><text x="50" y="58" font-size="34" font-family="sans-serif" text-anchor="middle" fill="%230b0c0f">🔥</text></svg>'
 ];
 
-type AppScreen = 'home' | 'create-room';
+type AppScreen = 'home' | 'create-room' | 'game';
 
 export const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('home');
@@ -206,13 +207,18 @@ export const App: React.FC = () => {
         <p>Приложение работает только в вертикальном режиме</p>
       </div>
 
-      {currentScreen === 'create-room' ? (
+      {currentScreen === 'game' && <GameScreen />}
+
+      {currentScreen === 'create-room' && (
         <CreateRoomScreen
           onBack={() => setCurrentScreen('home')}
+          onStartGame={() => setCurrentScreen('game')}
           playerNickname={nickname}
           playerAvatar={currentAvatar}
         />
-      ) : (
+      )}
+
+      {currentScreen === 'home' && (
         <div className={`app-viewport ${isOnboardingVisible ? 'background-dimmed-bw' : ''}`}>
           <main
             className="screen-container main-content-wrapper"
@@ -342,121 +348,119 @@ export const App: React.FC = () => {
               </div>
             </>
           )}
-        </div>
-      )}
 
-      {currentScreen === 'home' && (
-        <div className={`onboarding-modal-card ${isOnboardingVisible ? 'visible' : ''}`}>
-          {onboardingStep === 1 ? (
-            <>
-              <div className="onboarding-text-block">
-                <h2 className="onboarding-title">Давай познакомимся!</h2>
-                <p className="onboarding-subtitle">
-                  Я Крегг - а как тебя звать? *Выбранный тобой никнейм будет виден другим игрокам
-                </p>
-              </div>
-
-              <div className="onboarding-input-block">
-                <div className="onboarding-input-container">
-                  <input
-                    type="text"
-                    className="onboarding-name-input"
-                    placeholder="Моё имя"
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                    maxLength={13}
-                  />
-                  <span className="onboarding-char-counter">{nickname.length}/13</span>
+          <div className={`onboarding-modal-card ${isOnboardingVisible ? 'visible' : ''}`}>
+            {onboardingStep === 1 ? (
+              <>
+                <div className="onboarding-text-block">
+                  <h2 className="onboarding-title">Давай познакомимся!</h2>
+                  <p className="onboarding-subtitle">
+                    Я Крегг - а как тебя звать? *Выбранный тобой никнейм будет виден другим игрокам
+                  </p>
                 </div>
-                <span className="onboarding-input-hint">
-                  Выбирай себе классный никнейм и давай продолжим!
-                </span>
-              </div>
 
-              <div className="onboarding-footer-row">
-                <span className="onboarding-step-counter">1/2</span>
+                <div className="onboarding-input-block">
+                  <div className="onboarding-input-container">
+                    <input
+                      type="text"
+                      className="onboarding-name-input"
+                      placeholder="Моё имя"
+                      value={nickname}
+                      onChange={(e) => setNickname(e.target.value)}
+                      maxLength={13}
+                    />
+                    <span className="onboarding-char-counter">{nickname.length}/13</span>
+                  </div>
+                  <span className="onboarding-input-hint">
+                    Выбирай себе классный никнейм и давай продолжим!
+                  </span>
+                </div>
+
+                <div className="onboarding-footer-row">
+                  <span className="onboarding-step-counter">1/2</span>
+
+                  <button
+                    type="button"
+                    className={`onboarding-next-circle-btn ${isValidNickname ? 'active' : 'disabled'}`}
+                    onClick={handleNextOnboardingStep}
+                    disabled={!isValidNickname}
+                    aria-label="Далее"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div
+                  className="circular-carousel-stage"
+                  onTouchStart={handleWheelTouchStart}
+                  onTouchMove={handleWheelTouchMove}
+                  onTouchEnd={handleWheelTouchEnd}
+                >
+                  <div className="circular-carousel-wheel">
+                    {visibleOffsets.map((offset) => {
+                      const itemIndex =
+                        (currentIndex + offset + avatarsList.length * 100) % avatarsList.length;
+                      const itemSrc = avatarsList[itemIndex];
+                      const isLoaded = loadedImages[itemSrc];
+
+                      const effectiveOffset = offset + offsetRatio;
+                      const absOffset = Math.abs(effectiveOffset);
+
+                      const xPos = effectiveOffset * WHEEL_STEP_PX;
+                      const yPos = Math.pow(absOffset, 1.8) * 12;
+                      const rotZ = effectiveOffset * 14;
+                      const scale = Math.max(0.64, 1 - absOffset * 0.18);
+                      const blur = Math.min(6, absOffset * 2.2);
+                      const opacity = Math.max(0, 1 - absOffset * 0.42);
+
+                      return (
+                        <div
+                          key={`${offset}-${itemSrc}`}
+                          className={`carousel-arch-slot ${absOffset < 0.45 ? 'centered-active' : ''}`}
+                          style={{
+                            transform: `translate3d(${xPos}px, ${yPos}px, 0) rotate(${rotZ}deg) scale(${scale})`,
+                            opacity,
+                            filter: `blur(${blur}px)`,
+                            zIndex: Math.round(10 - absOffset * 2),
+                            transition: isSwipingWheel
+                              ? 'none'
+                              : 'transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1), filter 0.38s cubic-bezier(0.16, 1, 0.3, 1)'
+                          }}
+                          onClick={() => handleSelectSlot(itemIndex)}
+                        >
+                          <div className="avatar-capsule-box">
+                            {!isLoaded && <div className="avatar-loading-skeleton" />}
+                            <img
+                              src={itemSrc}
+                              alt=""
+                              className={`avatar-box-image ${isLoaded ? 'ready' : 'loading'}`}
+                              onLoad={() => handleImageLoaded(itemSrc)}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <p className="onboarding-avatar-description">
+                  Рад знакомству, {nickname.trim() || 'друг'}! Теперь выбери себе крутецкую аватарку
+                </p>
 
                 <button
                   type="button"
-                  className={`onboarding-next-circle-btn ${isValidNickname ? 'active' : 'disabled'}`}
-                  onClick={handleNextOnboardingStep}
-                  disabled={!isValidNickname}
-                  aria-label="Далее"
+                  className="ios-glass-btn green-accent-btn onboarding-finish-btn"
+                  onClick={handleFinishOnboarding}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
+                  Хочу эту
                 </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div
-                className="circular-carousel-stage"
-                onTouchStart={handleWheelTouchStart}
-                onTouchMove={handleWheelTouchMove}
-                onTouchEnd={handleWheelTouchEnd}
-              >
-                <div className="circular-carousel-wheel">
-                  {visibleOffsets.map((offset) => {
-                    const itemIndex =
-                      (currentIndex + offset + avatarsList.length * 100) % avatarsList.length;
-                    const itemSrc = avatarsList[itemIndex];
-                    const isLoaded = loadedImages[itemSrc];
-
-                    const effectiveOffset = offset + offsetRatio;
-                    const absOffset = Math.abs(effectiveOffset);
-
-                    const xPos = effectiveOffset * WHEEL_STEP_PX;
-                    const yPos = Math.pow(absOffset, 1.8) * 12;
-                    const rotZ = effectiveOffset * 14;
-                    const scale = Math.max(0.64, 1 - absOffset * 0.18);
-                    const blur = Math.min(6, absOffset * 2.2);
-                    const opacity = Math.max(0, 1 - absOffset * 0.42);
-
-                    return (
-                      <div
-                        key={`${offset}-${itemSrc}`}
-                        className={`carousel-arch-slot ${absOffset < 0.45 ? 'centered-active' : ''}`}
-                        style={{
-                          transform: `translate3d(${xPos}px, ${yPos}px, 0) rotate(${rotZ}deg) scale(${scale})`,
-                          opacity,
-                          filter: `blur(${blur}px)`,
-                          zIndex: Math.round(10 - absOffset * 2),
-                          transition: isSwipingWheel
-                            ? 'none'
-                            : 'transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1), filter 0.38s cubic-bezier(0.16, 1, 0.3, 1)'
-                        }}
-                        onClick={() => handleSelectSlot(itemIndex)}
-                      >
-                        <div className="avatar-capsule-box">
-                          {!isLoaded && <div className="avatar-loading-skeleton" />}
-                          <img
-                            src={itemSrc}
-                            alt=""
-                            className={`avatar-box-image ${isLoaded ? 'ready' : 'loading'}`}
-                            onLoad={() => handleImageLoaded(itemSrc)}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <p className="onboarding-avatar-description">
-                Рад знакомству, {nickname.trim() || 'друг'}! Теперь выбери себе крутецкую аватарку
-              </p>
-
-              <button
-                type="button"
-                className="ios-glass-btn green-accent-btn onboarding-finish-btn"
-                onClick={handleFinishOnboarding}
-              >
-                Хочу эту
-              </button>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
       )}
     </>
