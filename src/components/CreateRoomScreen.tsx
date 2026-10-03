@@ -145,40 +145,51 @@ export const CreateRoomScreen: React.FC<CreateRoomScreenProps> = ({
           </div>
         </div>
 
-        <div className="room-misc-card">
-          <div className="room-misc-row filled">
-            <span className="room-misc-title">Публичная комната</span>
-            <button
-              type="button"
-              className={`ios-switch-btn ${isPublic ? 'active' : ''}`}
-              onClick={handleTogglePublic}
-              aria-label="Включить публичную комнату"
-            >
-              <span className="ios-switch-thumb" />
-            </button>
+        <div className="room-misc-wrapper">
+          <div className="room-misc-card">
+            <div className="room-misc-row filled">
+              <span className="room-misc-title">Публичная комната</span>
+              <button
+                type="button"
+                className={`ios-switch-btn ${isPublic ? 'active' : ''}`}
+                onClick={handleTogglePublic}
+                aria-label="Включить публичную комнату"
+              >
+                <span className="ios-switch-thumb" />
+              </button>
+            </div>
+
+            <div className="room-misc-row transparent">
+              <span className="room-misc-title">Код комнаты</span>
+              <span
+                className={`room-plain-value ${isCodeCopied ? 'copied' : ''}`}
+                onClick={handleCopyCode}
+              >
+                {isCodeCopied ? 'Скопирован!' : roomCode}
+              </span>
+            </div>
+
+            <div className="room-misc-row filled">
+              <span className="room-misc-title">Ссылочка</span>
+              <span
+                className={`room-plain-value ${isLinkCopied ? 'copied' : ''}`}
+                onClick={handleCopyLink}
+              >
+                {isLinkCopied ? 'Скопировано!' : 'craig...'}
+              </span>
+            </div>
           </div>
 
-          <div className="room-misc-row transparent">
-            <span className="room-misc-title">Код комнаты</span>
-            <button
-              type="button"
-              className={`room-code-badge-btn ${isCodeCopied ? 'copied' : ''}`}
-              onClick={handleCopyCode}
-            >
-              {isCodeCopied ? 'Скопирован!' : roomCode}
-            </button>
-          </div>
-
-          <div className="room-misc-row filled">
-            <span className="room-misc-title">Ссылочка</span>
-            <button
-              type="button"
-              className={`room-link-badge-btn ${isLinkCopied ? 'copied' : ''}`}
-              onClick={handleCopyLink}
-            >
-              {isLinkCopied ? 'Скопировано!' : 'craig...'}
-            </button>
-          </div>
+          <p className="room-misc-subhint">
+            {isPublic ? (
+              'Теперь комната видна всем игрокам'
+            ) : (
+              <>
+                Сейчас в комнату можно попасть только{' '}
+                <span className="accent-highlight">по ссылке</span>
+              </>
+            )}
+          </p>
         </div>
       </div>
 
