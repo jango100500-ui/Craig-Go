@@ -19,12 +19,14 @@ function generateRandomCode(): string {
 
 interface CreateRoomScreenProps {
   onBack: () => void;
+  onStartGame: () => void;
   playerNickname: string;
   playerAvatar: string;
 }
 
 export const CreateRoomScreen: React.FC<CreateRoomScreenProps> = ({
   onBack,
+  onStartGame,
   playerNickname,
   playerAvatar
 }) => {
@@ -36,11 +38,18 @@ export const CreateRoomScreen: React.FC<CreateRoomScreenProps> = ({
   const [isPublic, setIsPublic] = useState(false);
   const [isCodeCopied, setIsCodeCopied] = useState(false);
   const [isLinkCopied, setIsLinkCopied] = useState(false);
+  const [isStartingGame, setIsStartingGame] = useState(false);
 
   const handleStartGame = () => {
+    if (isStartingGame) return;
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       navigator.vibrate([20, 40, 20]);
     }
+    setIsStartingGame(true);
+
+    setTimeout(() => {
+      onStartGame();
+    }, 1800);
   };
 
   const handleCopyCode = () => {
@@ -194,18 +203,27 @@ export const CreateRoomScreen: React.FC<CreateRoomScreenProps> = ({
       </div>
 
       <div className="create-room-bottom-actions">
-        <button
-          type="button"
-          className="ios-glass-btn green-accent-btn"
-          onClick={handleStartGame}
-        >
-          Начать игру
-        </button>
+        {isStartingGame ? (
+          <div className="ios-glass-btn room-start-loading-btn">
+            <div className="button-loader-slider">
+              <div className="button-loader-fill" />
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="ios-glass-btn green-accent-btn"
+            onClick={handleStartGame}
+          >
+            Начать игру
+          </button>
+        )}
 
         <button
           type="button"
           className="ios-glass-btn"
           onClick={onBack}
+          disabled={isStartingGame}
         >
           Выйти
         </button>
